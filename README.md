@@ -5,10 +5,11 @@
 * Presentation : https://docs.google.com/presentation/d/1jLbbzIdPzScWk_PLNYGdHZg-uFQRCM5O9zldJ72idSI/edit?usp=sharing
 
 ## How it works
-Follow the on screen prompts to about learn our animals and make donations. 
+Follow the on screen prompts to learn about our animals and make donations. 
 
 ## How to run?
-Go to the frontend folder, then unzip `env.zip` to get the `.env` file, and run `npm install && npm run dev`. Then open another terminal and go to the payments folder and unzip `env.zip`, then run `npm install && node app.js`.
+Go to the frontend folder and run `npm install && npm run dev`. Then open another terminal and go to the payments folder and then run `npm install && node app.js`.
+Each of these folders requires a `.env` file, which can be found on the slack.
 
 
 ## Team members
