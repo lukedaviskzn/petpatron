@@ -210,7 +210,7 @@ async function completePayment(nonce, interactionReference, res) {
 
         console.log(outgoingPayment);
         console.log("Payment confirmed");
-        res.send("Thank you for your payment, a dog will be very happy now")
+        res.send({ dog: id });
 
         await turso.execute({
             sql: 'UPDATE dogs SET account = account + ? WHERE id = ?;' ,

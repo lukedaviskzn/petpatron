@@ -7,8 +7,9 @@
     const dispatch = createEventDispatcher();
 </script>
 
-<div class="bg-slate-600 rounded-xl overflow-hidden w-1/4" transition:slide={{axis: "x"}}>
-    <a class="block bg-cover bg-center w-full h-96" style="background-image: url('/dogs/{dog.image}')" href="#" on:click={() => dispatch("selectDog")}></a>
+<a class="block bg-slate-600 rounded-xl overflow-hidden w-1/2 sm:w-1/3 lg:w-1/4 hidden [&:nth-of-type(-n+2)]:block sm:[&:nth-of-type(-n+3)]:block lg:[&:nth-of-type(-n+4)]:block" transition:slide={{axis: "x"}}
+href="#dogviewer" on:click={() => dispatch("selectDog")}>
+    <div class="bg-cover bg-center w-full h-96" style="background-image: url('/dogs/{dog.image}')"></div>
     <div class="flex p-4">
         <div class="flex-1">
             <h3 class="text-2xl mb-2">{dog.name}</h3>
@@ -23,4 +24,4 @@
             years old
         </div>
     </div>
-</div>
+</a>

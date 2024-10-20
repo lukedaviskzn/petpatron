@@ -2,10 +2,16 @@
     import DogCard from "$lib/DogCard.svelte";
     import NavBar from "$lib/NavBar.svelte";
     import { onDestroy, onMount } from "svelte";
+    import { page } from '$app/stores';
 
     export let data;
 
-    let subset_start = 0;
+    const urlParams = $page.url.searchParams;
+
+    let thanks = urlParams.get('thanks') !== null;
+
+    // @ts-ignore
+    let subset_start = urlParams.get('dog') !== null ? data.dogs.findIndex((d) => d.id === parseInt(urlParams.get('dog'))) : 41;
     /**
      * @type {any[]}
      */
@@ -25,6 +31,8 @@
     }
 
     function createSubset() {
+        console.log(urlParams.get('dog'), data.dogs.findIndex((d) => d.id === urlParams.get('dog')));
+
         let s = [];
 
         for (let i = subset_start; i < subset_start + 4; i++) {
@@ -51,7 +59,8 @@
     });
 
     /** @type {any} */
-    let open = null;
+    // @ts-ignore
+    let open = urlParams.get('dog') !== null ? data.dogs.find((d) => d.id === parseInt(urlParams.get('dog'))) : null;
     let open_payment = false;
     let loading = false;
 
@@ -92,13 +101,14 @@
 <div class="flex w-full">
     <button class="text-5xl p-2" on:click={() => {subset_start--; createSubset()}}>&langle;</button>
     <div class="flex gap-2 flex-1">
-        {#each subset as dog (dog.id)}
-            <DogCard dog={dog.dog} on:selectDog={() => open = dog.dog}/>
+        {#each subset as dog, i (dog.id)}
+            <DogCard dog={dog.dog} on:selectDog={() => {open = dog.dog; thanks = false;}}/>
         {/each}
     </div>
     <button class="text-5xl p-2" on:click={() => {subset_start++; createSubset()}}>&rangle;</button>
 </div>
 
+<div id="dogviewer"></div>
 {#if open}
     <div class="max-w-6xl mx-auto p-2 my-16">
         <div class="flex gap-4">
@@ -107,21 +117,27 @@
                 {#if typeof open.birth_date === "string"}
                     <p class="float-right text-xl text-slate-200">{(((new Date()).getTime() - (new Date(open.birth_date)).getTime()) / 1000 / 3600 / 24 / 365.25).toFixed(0)} years old</p>
                 {/if}
-                <h3 class="text-2xl mb-2">{open.name}</h3>
+                <h3 class="text-2xl mb-2">
+                    {open.name}
+                    {#if thanks}
+                        <small class:animate-pulse={thanks} class="text-slate-200 relative -top-0.5">appreciates your donation!</small>
+                    {/if}
+                </h3>
                 <p class="text-slate-200 mb-1">{open.breed}</p>
                 <p class="mb-2">{ open.bio } </p>
                 <div class="flex gap-2 items-center">
-                    <progress class="flex-1 my-0 rounded" value="{open.account}" max="100">{open.account}%</progress>
+                    <progress class:animate-pulse={thanks} class="flex-1 my-0 rounded" value="{open.account}" max="100">{open.account}%</progress>
                     ${open.account} / $100
                     <button class="bg-slate-600 rounded-sm px-2 py-1 border" on:click={() => open_payment = true}>Donate to Support { open.name }</button>
                 </div>
+
             </div>
         </div>
         
         {#if open_payment}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <!-- svelte-ignore a11y-no-static-element-interactions -->
-            <div class="absolute top-0 right-0 bottom-0 left-0 bg-black bg-opacity-50 flex items-center justify-center" on:click={() => open_payment = false}>
+            <div class="fixed top-0 right-0 bottom-0 left-0 bg-black bg-opacity-50 flex items-center justify-center" on:click={() => open_payment = false}>
                 <!-- svelte-ignore a11y-no-static-element-interactions -->
                 <div class="bg-slate-800 w-full max-w-md mx-2 rounded-lg px-3 py-2" on:click={e => e.stopPropagation()}>
                     <div class="flex">
