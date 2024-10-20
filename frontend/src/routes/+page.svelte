@@ -68,6 +68,9 @@
     let wallet = "";
     /** @type {number} */
     let amount = 1.0;
+    /** @type {boolean} */
+    let recurring = false;
+    
 
     /**
      * @param {SubmitEvent} e
@@ -86,7 +89,7 @@
         loading = true;
         let response;
         try {
-            response = await (await fetch(`http://127.0.0.1:3000/payment?from=${encodeURIComponent(wallet)}&to=${encodeURIComponent(SPCA_WALLET)}&amount=${encodeURIComponent(amount*100)}&dog=${open.id}`)).json();
+            response = await (await fetch(`http://127.0.0.1:3000/payment?from=${encodeURIComponent(wallet)}&to=${encodeURIComponent(SPCA_WALLET)}&amount=${encodeURIComponent(amount*100)}&dog=${open.id}&recurring=${recurring}`)).json();
         } catch {}
         loading = false;
 
@@ -137,7 +140,9 @@
         {#if open_payment}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <!-- svelte-ignore a11y-no-static-element-interactions -->
-            <div class="fixed top-0 right-0 bottom-0 left-0 bg-black bg-opacity-50 flex items-center justify-center" on:click={() => open_payment = false}>
+            <div class="fixed top-0 right-0 bottom-0 left-0 bg-black bg-opacity-50 flex items-center justify-center" on:click={() => {
+                if (!loading) open_payment = false;
+            }}>
                 <!-- svelte-ignore a11y-no-static-element-interactions -->
                 <div class="bg-slate-800 w-full max-w-md mx-2 rounded-lg px-3 py-2" on:click={e => e.stopPropagation()}>
                     <div class="flex">
@@ -158,8 +163,13 @@
                             <input class="flex-1" type="range" name="amount" id="amount" bind:value={amount} min="1" max="100" disabled={loading}><br>
                             <label for="amount">${amount}</label>
                         </div>
-                        <div class="text-right">
-                            <input class="bg-slate-600 rounded-sm px-2 py-1 border" type="submit" value="Donate" disabled={loading}>
+                        <div class="flex items-center gap-2">
+                            <div class="flex gap-2">
+                                <label for="recurring">Support {open.name} Monthly</label>
+                                <input type="checkbox" name="recurring" id="recurring" bind:checked={recurring}>
+                            </div>
+                            <div class="flex-1"></div>
+                            <input class="bg-slate-600 rounded-sm px-2 py-1 border enabled:border-slate-400 border-slate-600" type="submit" value="Donate" disabled={loading}>
                         </div>
                     </form>
                 </div>

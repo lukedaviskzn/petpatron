@@ -21,7 +21,7 @@ const port = 3000
 app.use(cors());
 
 app.get('/payment', (req, res) => {
-  handlePayment(res, req.query.amount, req.query.from, req.query.to, req.query.dog);
+  handlePayment(res, req.query.amount, req.query.from, req.query.to, req.query.dog, req.query.recurring);
 })
 
 app.get('/completePayment', (req, res) => {
@@ -53,7 +53,7 @@ async function generateBio(name, breed, hobbies,type,  res){
     res.send(completion.choices[0].message.content);
 }
 
-async function handlePayment(res, amount, wallet_from, wallet_to, id) {
+async function handlePayment(res, amount, wallet_from, wallet_to, id, recurring) {
     // 1. Get a grant for an incoming payment
     console.log(amount);
     console.log(wallet_from);
@@ -119,6 +119,8 @@ async function handlePayment(res, amount, wallet_from, wallet_to, id) {
     })
 
     let nonce = Math.floor(Math.random()*1000000).toString();
+
+    console.log(recurring, recurring === "true" ? `R/${new Date().toISOString()}/P1M` : undefined);
     
     // 5. Get a grant for an outgoing payment
     const outgoingPaymentGrant = await client.grant.request({
@@ -129,7 +131,8 @@ async function handlePayment(res, amount, wallet_from, wallet_to, id) {
                 type: "outgoing-payment",
                 actions:['create'],
                 limits: {
-                    debitAmount: quote.debitAmount
+                    debitAmount: quote.debitAmount,
+                    interval: recurring === "true" ? `R/${new Date().toISOString()}/P1M` : undefined,
                 },
                 identifier: sendingWalletAddress.id,
             }]
@@ -174,13 +177,13 @@ async function completePayment(nonce, interactionReference, res) {
         privateKey:"private.key",
         keyId: "884142b6-cd4d-4cc6-8e13-f9c13042e704"
     })
-    let outgoingPaymentGrantURL = importantData[nonce]["outgoingPaymentGrantURL"]
-    let outgoingPaymentGrantAccessToken = importantData[nonce]["outgoingPaymentGrantAccessToken"];
-    let sendingWalletAddressResourceServer = importantData[nonce]["sendingWalletAddressResourceServer"]
-    let sendingWalletAddressID = importantData[nonce]["sendingWalletAddressID"];
-    let quoteId = importantData[nonce]["quoteId"];
-    let amount = importantData[nonce]["amount"];
-    let id = importantData[nonce]["id"];
+    const outgoingPaymentGrantURL = importantData[nonce]["outgoingPaymentGrantURL"]
+    const outgoingPaymentGrantAccessToken = importantData[nonce]["outgoingPaymentGrantAccessToken"];
+    const sendingWalletAddressResourceServer = importantData[nonce]["sendingWalletAddressResourceServer"]
+    const sendingWalletAddressID = importantData[nonce]["sendingWalletAddressID"];
+    const quoteId = importantData[nonce]["quoteId"];
+    const amount = importantData[nonce]["amount"];
+    const id = importantData[nonce]["id"];
 
     // Your async task here, e.g., making an API call
     const finalisedOutgoingPayment = await client.grant.continue({
